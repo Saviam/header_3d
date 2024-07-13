@@ -3,41 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Car Model</title>
+    <title>3D Car Model - Porsche 911 GT2</title>
     <style>
         body { margin: 0; }
-        #container { width: 100%; height: 400px; background-color: white;}
+        #container { width: 100%; height: 100vh; background-color: white; }
     </style>
 </head>
 <body>
     <div id="container"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script>
         var scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xefefef);
+        scene.background = new THREE.Color(0xffffff);
+
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         var renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, 400);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('container').appendChild(renderer.domElement);
 
-        var geometry = new THREE.BoxGeometry();
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true;
+
+        var light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(1, 1, 1).normalize();
+        scene.add(light);
+
+        var ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        var loader = new THREE.OBJLoader();
+        loader.load('models/Porsche_911_GT2.obj', function (object) {
+            scene.add(object);
+            object.position.set(0, 0, 0);
+            object.scale.set(0.5, 0.5, 0.5); // Ajuste a escala conforme necessário
+            animate();
+        }, undefined, function (error) {
+            console.error(error);
+        });
 
         camera.position.z = 5;
 
         function animate() {
             requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
+            controls.update();
             renderer.render(scene, camera);
         }
-        animate();
 
-        // Add mouse controls
-        var controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false;
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
     </script>
 </body>
 </html>
